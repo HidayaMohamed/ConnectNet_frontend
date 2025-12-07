@@ -1,44 +1,48 @@
-import React, { useEffect, useState } from "react";
-import { likePost, unlikePost, getLikes } from "../api/api";
+import React, { useState } from "react";
+import { toggleLike } from "../api/api";
 
-// Button to like or unlike a post
 const LikeButton = ({ post, user }) => {
-  const [likes, setLikes] = useState(0);
-  const [liked, setLiked] = useState(false);
+  // 1. Calculate initial count from the 'likes' array provided by the backend
+  const initialLikesCount = post.likes ? post.likes.length : 0;
+  const [likes, setLikes] = useState(initialLikesCount);
 
-  // Load likes count
-  useEffect(() => {
-    const fetchLikes = async () => {
-      const count = await getLikes(post.id);
-      setLikes(count);
-    };
-    fetchLikes();
-  }, [post.id]);
+  // 2. Determine initial liked status by checking the likes array
+  const initialLikedStatus = user
+    ? post.likes.some((like) => like.user.id === user.id)
+    : false;
+  const [liked, setLiked] = useState(initialLikedStatus);
 
-  // Handle like/unlike
   const handleLike = async () => {
-    if (!user) return;
-    if (liked) {
-      await unlikePost(user.id, post.id);
-      setLikes(likes - 1);
-    } else {
-      await likePost(user.id, post.id);
-      setLikes(likes + 1);
+    if (!user) {
+      alert("Please log in to like a post.");
+      return;
     }
-    setLiked(!liked);
+
+    try {
+      // The toggleLike function handles POST/DELETE based on the 'liked' state
+      await toggleLike(post.id, user.id, liked);
+
+      // Update local state immediately for a smooth UX
+      setLikes(liked ? likes - 1 : likes + 1);
+      setLiked(!liked);
+    } catch (error) {
+      console.error("Like/Unlike failed:", error);
+    }
   };
 
   return (
-    <div className="flex items-center space-x-2 mb-2">
+    <div className="flex items-center space-x-3 mb-2">
       <button
         onClick={handleLike}
-        className={`px-2 py-1 rounded ${
-          liked ? "bg-sky-700 text-white" : "bg-sky-300 text-white"
+        className={`px-4 py-1 rounded-full text-sm font-semibold transition duration-200 ${
+          liked
+            ? "bg-red-500 text-white hover:bg-red-600"
+            : "bg-gray-200 text-gray-800 hover:bg-gray-300"
         }`}
       >
-        {liked ? "Liked" : "Like"}
+        {liked ? "❤️ Liked" : "🤍 Like"}
       </button>
-      <span>{likes} likes</span>
+      <span className="text-gray-600 text-sm">{likes} likes</span>
     </div>
   );
 };

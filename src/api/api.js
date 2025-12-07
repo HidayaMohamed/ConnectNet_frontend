@@ -1,22 +1,34 @@
-// Import axios for HTTP requests
 import axios from "axios";
 
-// Create an axios instance with base URL of your backend
 const api = axios.create({
-  baseURL: "http://127.0.0.1:8000", // change if your backend is on a different host/port
+  baseURL: "http://127.0.0.1:8000",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  // Ensure this is set for cookies/session handling (though we use token/data in this setup)
+  withCredentials: true,
 });
 
-// ----------- Auth APIs -----------
+// -------- AUTH --------
 export const login = async (username, password) => {
-  // Send POST request to /auth/login with credentials
-  const response = await api.post("/auth/login", { username, password });
-  return response.data; // Return the user object
+  try {
+    const response = await api.post("/auth/login", { username, password });
+    return response.data;
+  } catch (err) {
+    console.error("Login error:", err);
+    throw err;
+  }
 };
 
-// ----------- User APIs -----------
-export const getUsers = async () => {
-  const response = await api.get("/users/");
-  return response.data;
+// -------- USERS --------
+export const register = async (userData) => {
+  try {
+    const response = await api.post("/users", userData);
+    return response.data;
+  } catch (err) {
+    console.error("Registration error:", err);
+    throw err;
+  }
 };
 
 export const getUser = async (userId) => {
@@ -24,61 +36,68 @@ export const getUser = async (userId) => {
   return response.data;
 };
 
-// ----------- Post APIs -----------
+export const followUser = async (userId, targetUserId) => {
+  // FIX: Uses path parameters: /follows/{follower_id}/{following_id}
+  const response = await api.post(`/follows/${userId}/${targetUserId}`);
+  return response.data;
+};
+
+export const unfollowUser = async (userId, targetUserId) => {
+  // FIX: Uses DELETE method with path parameters: /follows/{follower_id}/{following_id}
+  const response = await api.delete(`/follows/${userId}/${targetUserId}`);
+  return response.data;
+};
+
+// -------- POSTS --------
 export const getPosts = async () => {
-  const response = await api.get("/posts/");
+  const response = await api.get("/posts");
   return response.data;
 };
 
-export const createPost = async (postData) => {
-  const response = await api.post("/posts/", postData);
+export const createPost = async (post) => {
+  const response = await api.post("/posts", post);
   return response.data;
 };
 
-// ----------- Comment APIs -----------
+// -------- COMMENTS --------
 export const getCommentsByPost = async (postId) => {
-  const response = await api.get(`/comments/post/${postId}`);
-  return response.data;
+  try {
+    // FIX: Path matches backend router: /comments/post/{post_id}
+    const response = await api.get(`/comments/post/${postId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Get comments error:", error.message);
+    return [];
+  }
 };
 
 export const addComment = async (commentData) => {
-  const response = await api.post("/comments/", commentData);
-  return response.data;
+  try {
+    // FIX: Path matches backend router: POST /comments (uses body)
+    const response = await api.post("/comments", commentData);
+    return response.data;
+  } catch (error) {
+    console.error("Add comment error:", error.message);
+    throw error;
+  }
 };
 
-// ----------- Like APIs -----------
-export const likePost = async (userId, postId) => {
-  const response = await api.post(`/likes/${userId}/${postId}`);
-  return response.data;
+// -------- LIKES --------
+export const toggleLike = async (postId, userId, liked) => {
+  try {
+    if (liked) {
+      // FIX: DELETE for unlike (using path params)
+      const response = await api.delete(`/likes/${userId}/${postId}`);
+      return response.data;
+    } else {
+      // FIX: POST for like (using path params)
+      const response = await api.post(`/likes/${userId}/${postId}`);
+      return response.data;
+    }
+  } catch (error) {
+    console.error("Toggle like error:", error.message);
+    throw error;
+  }
 };
 
-export const unlikePost = async (userId, postId) => {
-  const response = await api.delete(`/likes/${userId}/${postId}`);
-  return response.data;
-};
-
-export const getLikes = async (postId) => {
-  const response = await api.get(`/likes/post/${postId}`);
-  return response.data; // returns number of likes
-};
-
-// ----------- Follow APIs -----------
-export const followUser = async (followerId, followingId) => {
-  const response = await api.post(`/follows/${followerId}/${followingId}`);
-  return response.data;
-};
-
-export const unfollowUser = async (followerId, followingId) => {
-  const response = await api.delete(`/follows/${followerId}/${followingId}`);
-  return response.data;
-};
-
-export const getFollowers = async (userId) => {
-  const response = await api.get(`/follows/followers/${userId}`);
-  return response.data;
-};
-
-export const getFollowing = async (userId) => {
-  const response = await api.get(`/follows/following/${userId}`);
-  return response.data;
-};
+export default api;

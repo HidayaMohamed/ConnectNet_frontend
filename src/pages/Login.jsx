@@ -1,56 +1,50 @@
 import React, { useState } from "react";
-import { api } from "../api/api";
+import { login } from "../api/api";
+import { useNavigate } from "react-router-dom";
 
-export default function Login() {
+const Login = ({ setUser }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
+    setError("");
     try {
-      const res = await api.login({ username, password });
-      if (res.token) {
-        localStorage.setItem("token", res.token);
-        alert("Login successful!");
-        // Redirect to home page
-        window.location.href = "/";
-      } else {
-        setError(res.detail || "Login failed");
-      }
+      const userData = await login(username, password);
+      setUser(userData);
+      navigate("/"); // redirect to home
     } catch (err) {
-      setError("Something went wrong", err);
+      setError("Invalid username or password");
     }
   };
 
   return (
-    <div className="max-w-md mx-auto p-4 mt-20">
-      <h1 className="text-2xl font-bold mb-4">Login</h1>
-      {error && <p className="text-red-500 mb-2">{error}</p>}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          className="w-full p-2 border rounded"
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-2 border rounded"
-          required
-        />
-        <button
-          type="submit"
-          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
-        >
-          Login
-        </button>
-      </form>
+    <div className="max-w-md mx-auto mt-10 p-4 bg-white rounded shadow-md">
+      <h2 className="text-2xl font-bold mb-4 text-center">Login</h2>
+      {error && <p className="text-red-500 text-center mb-2">{error}</p>}
+      <input
+        type="text"
+        placeholder="Username"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+        className="w-full border p-2 rounded mb-2"
+      />
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        className="w-full border p-2 rounded mb-2"
+      />
+      <button
+        onClick={handleSubmit}
+        className="w-full bg-sky-500 text-white py-2 rounded"
+      >
+        Login
+      </button>
     </div>
   );
-}
+};
+
+export default Login;

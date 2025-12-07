@@ -1,54 +1,50 @@
 import React, { useEffect, useState } from "react";
-import CreatePost from "../components/CreatePost";
+import { getPosts } from "../api/api";
 import PostCard from "../components/PostCard";
-import { api } from "../api/api";
+import CreatePost from "../components/CreatePost"; // Import CreatePost
 
-export default function Home() {
+const Home = ({ user }) => {
   const [posts, setPosts] = useState([]);
 
-  // Load posts ONCE when component mounts
   useEffect(() => {
-    async function loadPosts() {
-      const data = await api.fetchPosts();
-      setPosts(data || []);
-    }
-    loadPosts();
+    const fetchPosts = async () => {
+      try {
+        const data = await getPosts();
+
+        // **********************************************
+        console.log("--- FINAL POSTS CHECK ---");
+        console.log("Is data an Array?", Array.isArray(data));
+        console.log("Number of posts received:", data.length);
+        console.log("First Post Data:", data[0]);
+        // **********************************************
+
+        setPosts(data.reverse()); // Keep the reverse for display order
+      } catch (error) {
+        console.error("Failed to fetch posts:", error);
+      }
+    };
+    fetchPosts();
   }, []);
 
-   const handlePostCreated = (newPost) => {
-     setPosts([newPost, ...posts]);
-   };
-  
-  const handleLike = async (postId, liked) => {
-    if (liked) {
-      await api.likePost(postId);
-    } else {
-      await api.unlikePost(postId);
-    }
-  };
-
-
-  const handleAddComment = async (postId, content) => {
-    try {
-      await api.addComment(postId, content);
-    } catch (err) {
-      console.error("Failed to add comment:", err);
-    }
+  const handlePostCreated = (newPost) => {
+    // Add the new post to the top of the feed
+    setPosts((prevPosts) => [newPost, ...prevPosts]);
   };
 
   return (
-    <div className="max-w-xl mx-auto p-4">
-      <CreatePost onPostCreated={handlePostCreated} />
-      <div className="mt-4 space-y-4">
-        {posts.map((post) => (
-          <PostCard
-            key={post.id}
-            post={post}
-            onLikeToggle={handleLike}
-            onAddComment={handleAddComment}
-          />
-        ))}
-      </div>
+    <div className="max-w-2xl mx-auto mt-4">
+      {user && <CreatePost user={user} onPostCreated={handlePostCreated} />}
+
+      {posts.map((post) => (
+        <PostCard key={post.id} post={post} user={user} />
+      ))}
+      {posts.length === 0 && (
+        <p className="text-center text-gray-500">
+          No posts yet. Be the first to post!
+        </p>
+      )}
     </div>
   );
-}
+};
+
+export default Home;

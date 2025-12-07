@@ -2,32 +2,37 @@ import React from "react";
 import CommentSection from "./CommentSection";
 import LikeButton from "./LikeButton";
 
-// Card to display a single post
 const PostCard = ({ post, user }) => {
+  // Use optional chaining for safety
+  const postUser = post.user || {};
+
   return (
-    <div className="bg-white shadow-md rounded-md p-4 mb-4">
-      {/* Post user info */}
-      <div className="flex items-center space-x-2 mb-2">
+    <div className="bg-white shadow-lg rounded-xl p-4 mb-6 border border-gray-200">
+      <div className="flex items-center space-x-3 mb-3">
         <img
-          src={post.user.avatar || "https://via.placeholder.com/40"}
-          alt={post.user.username}
-          className="w-10 h-10 rounded-full"
+          // Use optional chaining for safety
+          src={postUser.avatar || "https://via.placeholder.com/40"}
+          alt={postUser.username || "User"}
+          className="w-10 h-10 rounded-full object-cover"
         />
-        <span className="font-bold">{post.user.username}</span>
+        {/* Use optional chaining for safety */}
+        <span className="font-bold text-gray-800">{postUser.username}</span>
       </div>
 
-      {/* Post caption */}
-      <p className="mb-2">{post.caption}</p>
+      <p className="mb-3 text-gray-700">{post.caption}</p>
 
-      {/* Post media if exists */}
       {post.media_url && post.media_type === "image" && (
-        <img src={post.media_url} alt="post" className="rounded-md mb-2" />
+        <img
+          src={post.media_url}
+          alt="post media"
+          className="rounded-lg mb-3 w-full h-auto"
+        />
       )}
 
-      {/* Likes */}
-      <LikeButton post={post} user={user} />
+      {/* Pass the complete post object */}
+      {user && <LikeButton post={post} user={user} />}
 
-      {/* Comments */}
+      {/* Pass the complete post object */}
       <CommentSection post={post} user={user} />
     </div>
   );

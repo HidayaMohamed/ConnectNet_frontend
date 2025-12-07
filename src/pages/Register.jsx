@@ -1,63 +1,81 @@
 import React, { useState } from "react";
-import { api } from "../api/api";
+import { useNavigate } from "react-router-dom";
+import { register } from "../api/api";
 
-export default function Register() {
+const Register = () => {
   const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const navigate = useNavigate();
+
+  const handleRegister = async () => {
+    setError("");
+
     try {
-      const res = await api.register({ username, password, email });
-      if (res.id) {
-        alert("Registration successful!");
-        window.location.href = "/login";
-      } else {
-        setError(res.detail || "Registration failed");
-      }
+      // Must include all required fields for the backend schema
+      const userData = { username, email, password, name };
+
+      await register(userData);
+
+      alert("Registration successful! Please log in.");
+      navigate("/login");
     } catch (err) {
-      setError("Something went wrong", err);
+      // Handle backend errors (e.g., username/email conflict)
+      setError(
+        err.response?.data?.detail ||
+          "Registration failed. Please check your details."
+      );
+      console.error("Registration failed:", err);
     }
   };
 
   return (
-    <div className="max-w-md mx-auto p-4 mt-20">
-      <h1 className="text-2xl font-bold mb-4">Register</h1>
-      {error && <p className="text-red-500 mb-2">{error}</p>}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          className="w-full p-2 border rounded"
-          required
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-2 border rounded"
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-2 border rounded"
-          required
-        />
-        <button
-          type="submit"
-          className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600"
-        >
-          Register
-        </button>
-      </form>
+    <div className="max-w-md mx-auto mt-10 p-4 bg-white rounded shadow-md">
+      <h2 className="text-2xl font-bold mb-4 text-center">Register</h2>
+      {error && <p className="text-red-500 text-center mb-2">{error}</p>}
+
+      <input
+        type="text"
+        placeholder="Username"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+        className="w-full border p-2 rounded mb-2"
+        required
+      />
+      <input
+        type="email"
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className="w-full border p-2 rounded mb-2"
+        required
+      />
+      <input
+        type="text"
+        placeholder="Name (Optional)"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        className="w-full border p-2 rounded mb-2"
+      />
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        className="w-full border p-2 rounded mb-4"
+        required
+      />
+      <button
+        onClick={handleRegister}
+        className="w-full bg-sky-500 text-white py-2 rounded"
+      >
+        Register
+      </button>
     </div>
   );
-}
+};
+
+export default Register;

@@ -1,9 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { followUser, unfollowUser } from "../api/api";
 
-// Button to follow/unfollow a user
 const FollowButton = ({ user, targetUserId }) => {
   const [following, setFollowing] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      // optionally check if already following
+      setFollowing(user.following?.includes(targetUserId) || false);
+    }
+  }, [user, targetUserId]);
 
   const handleFollow = async () => {
     if (!user) return;
