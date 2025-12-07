@@ -1,86 +1,84 @@
-const BASE_URL = "http://127.0.0.1:8000"; // change if different
+// Import axios for HTTP requests
+import axios from "axios";
 
-export const api = {
-  // ----------------- AUTH -----------------
-  login: async (data) => {
-    const res = await fetch(`${BASE_URL}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-    return res.json();
-  },
+// Create an axios instance with base URL of your backend
+const api = axios.create({
+  baseURL: "http://127.0.0.1:8000", // change if your backend is on a different host/port
+});
 
-  register: async (data) => {
-    const res = await fetch(`${BASE_URL}/auth/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-    return res.json();
-  },
+// ----------- Auth APIs -----------
+export const login = async (username, password) => {
+  // Send POST request to /auth/login with credentials
+  const response = await api.post("/auth/login", { username, password });
+  return response.data; // Return the user object
+};
 
-  // ----------------- USERS -----------------
-  fetchUsers: async () => {
-    const res = await fetch(`${BASE_URL}/users`);
-    return res.json();
-  },
+// ----------- User APIs -----------
+export const getUsers = async () => {
+  const response = await api.get("/users/");
+  return response.data;
+};
 
-  followUser: async (userId) => {
-    const res = await fetch(`${BASE_URL}/follows/${userId}`, {
-      method: "POST",
-    });
-    return res.json();
-  },
+export const getUser = async (userId) => {
+  const response = await api.get(`/users/${userId}`);
+  return response.data;
+};
 
-  unfollowUser: async (userId) => {
-    const res = await fetch(`${BASE_URL}/follows/${userId}`, {
-      method: "DELETE",
-    });
-    return res.json();
-  },
+// ----------- Post APIs -----------
+export const getPosts = async () => {
+  const response = await api.get("/posts/");
+  return response.data;
+};
 
-  // ----------------- POSTS -----------------
-  fetchPosts: async () => {
-    const res = await fetch(`${BASE_URL}/posts`);
-    return res.json();
-  },
+export const createPost = async (postData) => {
+  const response = await api.post("/posts/", postData);
+  return response.data;
+};
 
-  createPost: async (data) => {
-    const res = await fetch(`${BASE_URL}/posts`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-    return res.json();
-  },
+// ----------- Comment APIs -----------
+export const getCommentsByPost = async (postId) => {
+  const response = await api.get(`/comments/post/${postId}`);
+  return response.data;
+};
 
-  likePost: async (postId) => {
-    const res = await fetch(`${BASE_URL}/likes/${postId}`, {
-      method: "POST",
-    });
-    return res.json();
-  },
+export const addComment = async (commentData) => {
+  const response = await api.post("/comments/", commentData);
+  return response.data;
+};
 
-  unlikePost: async (postId) => {
-    const res = await fetch(`${BASE_URL}/likes/${postId}`, {
-      method: "DELETE",
-    });
-    return res.json();
-  },
+// ----------- Like APIs -----------
+export const likePost = async (userId, postId) => {
+  const response = await api.post(`/likes/${userId}/${postId}`);
+  return response.data;
+};
 
-  // ----------------- COMMENTS -----------------
-  fetchComments: async (postId) => {
-    const res = await fetch(`${BASE_URL}/comments/${postId}`);
-    return res.json();
-  },
+export const unlikePost = async (userId, postId) => {
+  const response = await api.delete(`/likes/${userId}/${postId}`);
+  return response.data;
+};
 
-  addComment: async (postId, content) => {
-    const res = await fetch(`${BASE_URL}/comments/${postId}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content }),
-    });
-    return res.json();
-  },
+export const getLikes = async (postId) => {
+  const response = await api.get(`/likes/post/${postId}`);
+  return response.data; // returns number of likes
+};
+
+// ----------- Follow APIs -----------
+export const followUser = async (followerId, followingId) => {
+  const response = await api.post(`/follows/${followerId}/${followingId}`);
+  return response.data;
+};
+
+export const unfollowUser = async (followerId, followingId) => {
+  const response = await api.delete(`/follows/${followerId}/${followingId}`);
+  return response.data;
+};
+
+export const getFollowers = async (userId) => {
+  const response = await api.get(`/follows/followers/${userId}`);
+  return response.data;
+};
+
+export const getFollowing = async (userId) => {
+  const response = await api.get(`/follows/following/${userId}`);
+  return response.data;
 };

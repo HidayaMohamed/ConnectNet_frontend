@@ -1,35 +1,31 @@
-import { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { api } from "../api/api";
 
-export default function FollowButton({ userId }) {
-  const [isFollowing, setIsFollowing] = useState(false);
+export default function FollowButton({ userId, initialFollowing }) {
+  const [following, setFollowing] = useState(initialFollowing);
 
-  useEffect(() => {
-    // Optionally fetch initial follow state from API
-    // Example: api.isFollowing(userId).then(setIsFollowing)
-  }, [userId]);
-
-  const toggleFollow = async () => {
+  const handleFollow = async () => {
     try {
-      if (isFollowing) {
+      if (following) {
         await api.unfollowUser(userId);
+        setFollowing(false);
       } else {
         await api.followUser(userId);
+        setFollowing(true);
       }
-      setIsFollowing(!isFollowing);
     } catch (err) {
-      console.error(err);
+      console.error("Error following/unfollowing user:", err);
     }
   };
 
   return (
     <button
-      onClick={toggleFollow}
+      onClick={handleFollow}
       className={`px-3 py-1 rounded ${
-        isFollowing ? "bg-gray-300 text-black" : "bg-blue-600 text-white"
-      } hover:opacity-80 transition`}
+        following ? "bg-gray-300 text-black" : "bg-blue-500 text-white"
+      }`}
     >
-      {isFollowing ? "Following" : "Follow"}
+      {following ? "Following" : "Follow"}
     </button>
   );
 }

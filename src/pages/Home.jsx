@@ -15,11 +15,10 @@ export default function Home() {
     loadPosts();
   }, []);
 
-  const handlePostCreated = async (content) => {
-    const newPost = await api.createPost({ user_id: 1, content });
-    setPosts((prev) => [newPost, ...prev]);
-  };
-
+   const handlePostCreated = (newPost) => {
+     setPosts([newPost, ...posts]);
+   };
+  
   const handleLike = async (postId, liked) => {
     if (liked) {
       await api.likePost(postId);
@@ -28,12 +27,26 @@ export default function Home() {
     }
   };
 
+
+  const handleAddComment = async (postId, content) => {
+    try {
+      await api.addComment(postId, content);
+    } catch (err) {
+      console.error("Failed to add comment:", err);
+    }
+  };
+
   return (
     <div className="max-w-xl mx-auto p-4">
       <CreatePost onPostCreated={handlePostCreated} />
       <div className="mt-4 space-y-4">
         {posts.map((post) => (
-          <PostCard key={post.id} post={post} onLike={handleLike} />
+          <PostCard
+            key={post.id}
+            post={post}
+            onLikeToggle={handleLike}
+            onAddComment={handleAddComment}
+          />
         ))}
       </div>
     </div>

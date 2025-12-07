@@ -1,41 +1,34 @@
 import React, { useState } from "react";
+import { api } from "../api/api";
 
-export default function CreatePost({ userId, onPostCreated }) {
-  const [caption, setCaption] = useState("");
-  const [mediaUrl, setMediaUrl] = useState("");
+export default function CreatePost({ onPostCreated }) {
+  const [content, setContent] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await fetch("http://127.0.0.1:8000/posts/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: userId, caption, media_url: mediaUrl }),
-    });
-    const data = await res.json();
-    onPostCreated(data);
-    setCaption("");
-    setMediaUrl("");
+    if (!content.trim()) return;
+
+    try {
+      const newPost = await api.createPost({ content });
+      onPostCreated(newPost);
+      setContent("");
+    } catch (err) {
+      console.error("Failed to create post:", err);
+    }
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="mb-4 p-4 border rounded bg-white shadow"
-    >
+    <form onSubmit={handleSubmit} className="mb-4">
       <textarea
-        className="w-full border p-2 mb-2 rounded"
+        className="w-full border rounded p-2 mb-2"
         placeholder="What's on your mind?"
-        value={caption}
-        onChange={(e) => setCaption(e.target.value)}
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
       />
-      <input
-        type="text"
-        className="w-full border p-2 mb-2 rounded"
-        placeholder="Media URL (optional)"
-        value={mediaUrl}
-        onChange={(e) => setMediaUrl(e.target.value)}
-      />
-      <button type="submit" className="bg-blue-600 text-white p-2 rounded">
+      <button
+        className="bg-blue-500 text-white px-4 py-2 rounded"
+        type="submit"
+      >
         Post
       </button>
     </form>
