@@ -7,17 +7,18 @@ export default function Home() {
   const [posts, setPosts] = useState([]);
 
   // Load all posts
+  const loadPosts = async () => {
+    try {
+      const response = await api.get("/posts/");
+      setPosts(response.data);
+    } catch (err) {
+      console.error("Failed to load posts:", err);
+    }
+  };
 
   // Only runs once on mount
   useEffect(() => {
-    const loadPosts = async () => {
-      try {
-        const response = await api.get("/posts/");
-        setPosts(response.data);
-      } catch (err) {
-        console.error("Failed to load posts:", err);
-      }
-    };;
+    loadPosts();
   }, []);
 
   // Called after creating a post
