@@ -1,38 +1,17 @@
-import { useState, useEffect } from "react";
-import { apiPost, apiDelete } from "../api/api";
+import FollowButton from "./FollowButton";
+import Likes from "./Likes";
+import CommentSection from "./CommentSection";
 
-export default function PostCard({ post, onCommentAdded }) {
-  const [likes, setLikes] = useState(post.likes || 0);
-  const [liked, setLiked] = useState(false);
-
-  const handleLike = async () => {
-    if (liked) {
-      await apiDelete("/likes/", { user_id: 1, post_id: post.id });
-      setLikes(likes - 1);
-    } else {
-      await apiPost("/likes/", { user_id: 1, post_id: post.id });
-      setLikes(likes + 1);
-    }
-
-    setLiked(!liked);
-  };
-
+export default function PostCard({ post }) {
   return (
-    <div className="border rounded p-4 mb-4 bg-white shadow">
-      <p className="font-bold mb-2">User #{post.user_id}</p>
-
-      <p className="mb-2">{post.caption}</p>
-
-      {post.media_url && (
-        <img src={post.media_url} alt="media" className="rounded mb-2" />
-      )}
-
-      <div className="flex gap-3 items-center">
-        <button className="text-xl" onClick={handleLike}>
-          {liked ? "❤️" : "🤍"}
-        </button>
-        <span>{likes} likes</span>
+    <div className="p-4 border rounded shadow mb-4">
+      <div className="flex justify-between items-center mb-2">
+        <div className="font-semibold">{post.user.username}</div>
+        <FollowButton userId={post.user.id} />
       </div>
+      <p className="mb-2">{post.content}</p>
+      <Likes postId={post.id} initialLikes={post.likes_count} />
+      <CommentSection postId={post.id} />
     </div>
   );
 }
