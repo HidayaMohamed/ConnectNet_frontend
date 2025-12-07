@@ -1,18 +1,38 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-export default function Navbar() {
+// Navbar component to display site navigation
+const Navbar = ({ user }) => {
   return (
-    <nav className="bg-blue-600 text-white p-4 flex justify-between">
-      <Link to="/" className="font-bold text-xl">
+    <nav className="bg-sky-500 p-4 text-white flex justify-between items-center">
+      {/* Site logo */}
+      <Link to="/" className="font-bold text-lg">
         ConnectNet
       </Link>
 
-      <div className="flex gap-4">
-        <Link to="/">Home</Link>
-        <Link to="/profile/1">Profile</Link>
-        <Link to="/login">Login</Link>
+      {/* Navigation links */}
+      <div className="space-x-4">
+        {user ? (
+          <>
+            {/* Show username and profile link if logged in */}
+            <span>{user.username}</span>
+            <Link to={`/profile/${user.id}`} className="hover:underline">
+              Profile
+            </Link>
+          </>
+        ) : (
+          <>
+            <Link to="/login" className="hover:underline">
+              Login
+            </Link>
+            <Link to="/register" className="hover:underline">
+              Register
+            </Link>
+          </>
+        )}
       </div>
     </nav>
   );
-}
+};
+
+export default Navbar;

@@ -1,31 +1,30 @@
 import React, { useState } from "react";
-import { api } from "../api/api";
+import { followUser, unfollowUser } from "../api/api";
 
-export default function FollowButton({ userId, initialFollowing }) {
-  const [following, setFollowing] = useState(initialFollowing);
+// Button to follow/unfollow a user
+const FollowButton = ({ user, targetUserId }) => {
+  const [following, setFollowing] = useState(false);
 
   const handleFollow = async () => {
-    try {
-      if (following) {
-        await api.unfollowUser(userId);
-        setFollowing(false);
-      } else {
-        await api.followUser(userId);
-        setFollowing(true);
-      }
-    } catch (err) {
-      console.error("Error following/unfollowing user:", err);
+    if (!user) return;
+    if (following) {
+      await unfollowUser(user.id, targetUserId);
+    } else {
+      await followUser(user.id, targetUserId);
     }
+    setFollowing(!following);
   };
 
   return (
     <button
       onClick={handleFollow}
-      className={`px-3 py-1 rounded ${
-        following ? "bg-gray-300 text-black" : "bg-blue-500 text-white"
+      className={`px-3 py-1 rounded text-white ${
+        following ? "bg-sky-700" : "bg-sky-500"
       }`}
     >
       {following ? "Following" : "Follow"}
     </button>
   );
-}
+};
+
+export default FollowButton;

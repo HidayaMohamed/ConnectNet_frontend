@@ -1,36 +1,38 @@
 import React, { useState } from "react";
-import { api } from "../api/api";
+import { createPost } from "../api/api";
 
-export default function CreatePost({ onPostCreated }) {
-  const [content, setContent] = useState("");
+// Component to create a new post
+const CreatePost = ({ user, onPostCreated }) => {
+  const [caption, setCaption] = useState("");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!content.trim()) return;
-
-    try {
-      const newPost = await api.createPost({ content });
-      onPostCreated(newPost);
-      setContent("");
-    } catch (err) {
-      console.error("Failed to create post:", err);
-    }
+  const handleSubmit = async () => {
+    if (!caption || !user) return;
+    const post = await createPost({
+      user_id: user.id,
+      caption,
+      media_url: null,
+      media_type: null,
+    });
+    onPostCreated(post);
+    setCaption(""); // clear input
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mb-4">
+    <div className="bg-white p-4 rounded-md shadow-md mb-4">
       <textarea
-        className="w-full border rounded p-2 mb-2"
         placeholder="What's on your mind?"
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
+        value={caption}
+        onChange={(e) => setCaption(e.target.value)}
+        className="w-full border p-2 rounded mb-2"
       />
       <button
-        className="bg-blue-500 text-white px-4 py-2 rounded"
-        type="submit"
+        onClick={handleSubmit}
+        className="bg-sky-500 text-white px-4 py-2 rounded"
       >
         Post
       </button>
-    </form>
+    </div>
   );
-}
+};
+
+export default CreatePost;

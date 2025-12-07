@@ -1,30 +1,36 @@
 import React from "react";
-import LikeButton from "./LikeButton";
 import CommentSection from "./CommentSection";
-import FollowButton from "./FollowButton";
+import LikeButton from "./LikeButton";
 
-export default function PostCard({ post, onLikeToggle, onAddComment }) {
+// Card to display a single post
+const PostCard = ({ post, user }) => {
   return (
-    <div className="border p-4 rounded mb-4 bg-white shadow">
-      <div className="flex justify-between items-center mb-2">
-        <h3 className="font-bold">{post.user.username}</h3>
-        <FollowButton
-          userId={post.user.id}
-          initialFollowing={post.user.following}
+    <div className="bg-white shadow-md rounded-md p-4 mb-4">
+      {/* Post user info */}
+      <div className="flex items-center space-x-2 mb-2">
+        <img
+          src={post.user.avatar || "https://via.placeholder.com/40"}
+          alt={post.user.username}
+          className="w-10 h-10 rounded-full"
         />
+        <span className="font-bold">{post.user.username}</span>
       </div>
-      <p className="mb-2">{post.content}</p>
-      <LikeButton
-        postId={post.id}
-        initialLiked={post.liked}
-        likesCount={post.likes_count}
-        onToggle={(liked) => onLikeToggle(post.id, liked)}
-      />
-      <CommentSection
-        postId={post.id}
-        comments={post.comments}
-        onAddComment={(content) => onAddComment(post.id, content)}
-      />
+
+      {/* Post caption */}
+      <p className="mb-2">{post.caption}</p>
+
+      {/* Post media if exists */}
+      {post.media_url && post.media_type === "image" && (
+        <img src={post.media_url} alt="post" className="rounded-md mb-2" />
+      )}
+
+      {/* Likes */}
+      <LikeButton post={post} user={user} />
+
+      {/* Comments */}
+      <CommentSection post={post} user={user} />
     </div>
   );
-}
+};
+
+export default PostCard;
