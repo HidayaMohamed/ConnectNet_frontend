@@ -8,27 +8,43 @@ const Register = () => {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
   const handleRegister = async () => {
     setError("");
 
+    const u = (username || "").trim();
+    const e = (email || "").trim();
+    const p = (password || "").trim();
+
+    if (!u || !e || !p) {
+      setError("Username, email and password are required.");
+      return;
+    }
+
+    setLoading(true);
     try {
-      // Must include all required fields for the backend schema
-      const userData = { username, email, password, name };
-
+      const userData = {
+        username: u,
+        email: e,
+        password: p,
+        name: (name || "").trim(),
+      };
       await register(userData);
-
       alert("Registration successful! Please log in.");
       navigate("/login");
     } catch (err) {
-      // Handle backend errors (e.g., username/email conflict)
       setError(
-        err.response?.data?.detail ||
+        err?.response?.data?.detail ||
+          err?.response?.data?.error ||
+          err?.message ||
           "Registration failed. Please check your details."
       );
       console.error("Registration failed:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -44,6 +60,11 @@ const Register = () => {
         onChange={(e) => setUsername(e.target.value)}
         className="w-full border p-2 rounded mb-2"
         required
+        disabled={loading}
+        aria-label="username"
+        onKeyDown={(e) => {
+          if (e.key === "Enter") handleRegister();
+        }}
       />
       <input
         type="email"
@@ -52,6 +73,11 @@ const Register = () => {
         onChange={(e) => setEmail(e.target.value)}
         className="w-full border p-2 rounded mb-2"
         required
+        disabled={loading}
+        aria-label="email"
+        onKeyDown={(e) => {
+          if (e.key === "Enter") handleRegister();
+        }}
       />
       <input
         type="text"
@@ -59,6 +85,8 @@ const Register = () => {
         value={name}
         onChange={(e) => setName(e.target.value)}
         className="w-full border p-2 rounded mb-2"
+        disabled={loading}
+        aria-label="name"
       />
       <input
         type="password"
@@ -67,15 +95,21 @@ const Register = () => {
         onChange={(e) => setPassword(e.target.value)}
         className="w-full border p-2 rounded mb-4"
         required
+        disabled={loading}
+        aria-label="password"
+        onKeyDown={(e) => {
+          if (e.key === "Enter") handleRegister();
+        }}
       />
       <button
         onClick={handleRegister}
-        className="w-full bg-sky-500 text-white py-2 rounded"
+        className="w-full bg-sky-500 text-white py-2 rounded disabled:opacity-50"
+        disabled={loading}
+        aria-busy={loading}
       >
-        Register
+        {loading ? "Registering..." : "Register"}
       </button>
     </div>
   );
 };
-
 export default Register;

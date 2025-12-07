@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getPosts } from "../api/api";
 import PostCard from "../components/PostCard";
-import CreatePost from "../components/CreatePost"; // Import CreatePost
+import CreatePost from "../components/CreatePost";
 
 const Home = ({ user }) => {
   const [posts, setPosts] = useState([]);
@@ -11,14 +11,21 @@ const Home = ({ user }) => {
       try {
         const data = await getPosts();
 
-        // **********************************************
-        console.log("--- FINAL POSTS CHECK ---");
-        console.log("Is data an Array?", Array.isArray(data));
-        console.log("Number of posts received:", data.length);
-        console.log("First Post Data:", data[0]);
-        // **********************************************
+        let postsArray = [];
+        if (Array.isArray(data)) {
+          postsArray = data;
+        } else if (data && Array.isArray(data.posts)) {
+          postsArray = data.posts;
+        } else {
+          postsArray = [];
+        }
 
-        setPosts(data.reverse()); // Keep the reverse for display order
+        console.log("--- FINAL POSTS CHECK ---");
+        console.log("Is data an Array?", Array.isArray(postsArray));
+        console.log("Number of posts received:", postsArray.length);
+        console.log("First Post Data:", postsArray[0]);
+
+        setPosts(postsArray.slice().reverse());
       } catch (error) {
         console.error("Failed to fetch posts:", error);
       }
@@ -27,7 +34,6 @@ const Home = ({ user }) => {
   }, []);
 
   const handlePostCreated = (newPost) => {
-    // Add the new post to the top of the feed
     setPosts((prevPosts) => [newPost, ...prevPosts]);
   };
 

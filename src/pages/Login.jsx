@@ -2,20 +2,34 @@ import React, { useState } from "react";
 import { login } from "../api/api";
 import { useNavigate } from "react-router-dom";
 
-const Login = ({ setUser }) => {
+const Login = ({ setUser = () => {} }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async () => {
     setError("");
+    const u = (username || "").trim();
+    const p = (password || "").trim();
+    if (!u || !p) {
+      setError("Please provide username and password.");
+      return;
+    }
+    setLoading(true);
     try {
-      const userData = await login(username, password);
+      const userData = await login(u, p);
       setUser(userData);
-      navigate("/"); // redirect to home
+      navigate("/");
     } catch (err) {
-      setError("Invalid username or password");
+      setError(
+        err?.response?.data?.detail ||
+          err?.message ||
+          "Invalid username or password"
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -29,6 +43,12 @@ const Login = ({ setUser }) => {
         value={username}
         onChange={(e) => setUsername(e.target.value)}
         className="w-full border p-2 rounded mb-2"
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            handleSubmit();
+          }
+        }}
+        aria-label="username"
       />
       <input
         type="password"
@@ -36,12 +56,20 @@ const Login = ({ setUser }) => {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         className="w-full border p-2 rounded mb-2"
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            handleSubmit();
+          }
+        }}
+        aria-label="password"
       />
       <button
         onClick={handleSubmit}
-        className="w-full bg-sky-500 text-white py-2 rounded"
+        className="w-full bg-sky-500 text-white py-2 rounded disabled:opacity-50"
+        disabled={loading}
+        aria-busy={loading}
       >
-        Login
+        {loading ? "Logging in..." : "Login"}
       </button>
     </div>
   );

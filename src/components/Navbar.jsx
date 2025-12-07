@@ -1,11 +1,10 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-const Navbar = ({ user, setUser }) => {
+const Navbar = ({ user, setUser = () => {} }) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Simple frontend logout by clearing the user state
     setUser(null);
     navigate("/login");
   };

@@ -5,7 +5,6 @@ const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  // Ensure this is set for cookies/session handling (though we use token/data in this setup)
   withCredentials: true,
 });
 
@@ -30,24 +29,25 @@ export const register = async (userData) => {
     throw err;
   }
 };
-
 export const getUser = async (userId) => {
-  const response = await api.get(`/users/${userId}`);
-  return response.data;
+  try {
+    const response = await api.get(`/users/${userId}`);
+    return response.data;
+  } catch (err) {
+    console.error("Get user error:", err);
+    throw err;
+  }
 };
 
 export const followUser = async (userId, targetUserId) => {
-  // FIX: Uses path parameters: /follows/{follower_id}/{following_id}
   const response = await api.post(`/follows/${userId}/${targetUserId}`);
   return response.data;
 };
 
 export const unfollowUser = async (userId, targetUserId) => {
-  // FIX: Uses DELETE method with path parameters: /follows/{follower_id}/{following_id}
   const response = await api.delete(`/follows/${userId}/${targetUserId}`);
   return response.data;
 };
-
 // -------- POSTS --------
 export const getPosts = async () => {
   const response = await api.get("/posts");
@@ -62,7 +62,6 @@ export const createPost = async (post) => {
 // -------- COMMENTS --------
 export const getCommentsByPost = async (postId) => {
   try {
-    // FIX: Path matches backend router: /comments/post/{post_id}
     const response = await api.get(`/comments/post/${postId}`);
     return response.data;
   } catch (error) {
@@ -73,7 +72,6 @@ export const getCommentsByPost = async (postId) => {
 
 export const addComment = async (commentData) => {
   try {
-    // FIX: Path matches backend router: POST /comments (uses body)
     const response = await api.post("/comments", commentData);
     return response.data;
   } catch (error) {
@@ -83,14 +81,13 @@ export const addComment = async (commentData) => {
 };
 
 // -------- LIKES --------
-export const toggleLike = async (postId, userId, liked) => {
+// Note: backend uses /likes/{user_id}/{post_id}
+export const toggleLike = async (userId, postId, liked) => {
   try {
     if (liked) {
-      // FIX: DELETE for unlike (using path params)
       const response = await api.delete(`/likes/${userId}/${postId}`);
       return response.data;
     } else {
-      // FIX: POST for like (using path params)
       const response = await api.post(`/likes/${userId}/${postId}`);
       return response.data;
     }

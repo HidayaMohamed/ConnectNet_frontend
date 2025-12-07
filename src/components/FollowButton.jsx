@@ -1,34 +1,70 @@
 import React, { useState, useEffect } from "react";
 import { followUser, unfollowUser } from "../api/api";
 
-const FollowButton = ({ user, targetUserId }) => {
-  const [following, setFollowing] = useState(false);
+const FollowButton = ({ user, targetUserId, initialFollowing }) => {
+  const [following, setFollowing] = useState(Boolean(initialFollowing));
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      // optionally check if already following
-      setFollowing(user.following?.includes(targetUserId) || false);
+    if (initialFollowing !== undefined) {
+      setFollowing(Boolean(initialFollowing));
+      return;
     }
-  }, [user, targetUserId]);
+    if (!user) {
+      setFollowing(false);
+      return;
+    }
+    // Support several possible shapes for user.following:
+    // - array of ids: [2,3]
+    // - array of objects: [{ follower_id: 1, following_id: 2 }, ...]
+    const list = user.following || [];
+    if (Array.isArray(list)) {
+      const isFollowing = list.some((item) => {
+        if (item == null) return false;
+        if (typeof item === "number") return item === targetUserId;
+        if (typeof item === "object") {
+          return (
+            item.following_id === targetUserId ||
+            item.id === targetUserId ||
+            item.user_id === targetUserId
+          );
+        }
+        return false;
+      });
+      setFollowing(Boolean(isFollowing));
+    } else {
+      setFollowing(false);
+    }
+  }, [user, targetUserId, initialFollowing]);
 
   const handleFollow = async () => {
-    if (!user) return;
-    if (following) {
-      await unfollowUser(user.id, targetUserId);
-    } else {
-      await followUser(user.id, targetUserId);
+    if (!user || user.id === targetUserId || loading) return;
+    setLoading(true);
+    try {
+      if (following) {
+        await unfollowUser(user.id, targetUserId);
+        setFollowing(false);
+      } else {
+        await followUser(user.id, targetUserId);
+        setFollowing(true);
+      }
+    } catch (err) {
+      console.error("Follow action failed:", err);
+    } finally {
+      setLoading(false);
     }
-    setFollowing(!following);
   };
 
   return (
     <button
       onClick={handleFollow}
+      disabled={!user || user.id === targetUserId || loading}
       className={`px-3 py-1 rounded text-white ${
         following ? "bg-sky-700" : "bg-sky-500"
-      }`}
+      } ${loading ? "opacity-60 cursor-wait" : ""}`}
+      aria-pressed={following}
     >
-      {following ? "Following" : "Follow"}
+      {loading ? "..." : following ? "Following" : "Follow"}
     </button>
   );
 };

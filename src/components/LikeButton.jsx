@@ -1,16 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toggleLike } from "../api/api";
 
-const LikeButton = ({ post, user }) => {
-  // 1. Calculate initial count from the 'likes' array provided by the backend
-  const initialLikesCount = post.likes ? post.likes.length : 0;
-  const [likes, setLikes] = useState(initialLikesCount);
+const LikeButton = ({ post = {}, user }) => {
+  const safeLikesArray = Array.isArray(post.likes) ? post.likes : [];
+  const [likes, setLikes] = useState(safeLikesArray.length);
 
-  // 2. Determine initial liked status by checking the likes array
-  const initialLikedStatus = user
-    ? post.likes.some((like) => like.user.id === user.id)
-    : false;
-  const [liked, setLiked] = useState(initialLikedStatus);
+  const determineLiked = (p, u) => {
+    if (!u || !Array.isArray(p?.likes)) return false;
+    return p.likes.some((like) => {
+      if (!like) return false;
+      return (like.user?.id ?? like.user_id ?? like.userId) === u.id;
+    });
+  };
+
+  const [liked, setLiked] = useState(() => determineLiked(post, user));
+
+  useEffect(() => {
+    setLikes(Array.isArray(post?.likes) ? post.likes.length : 0);
+    setLiked(determineLiked(post, user));
+  }, [post, user]);
 
   const handleLike = async () => {
     if (!user) {
@@ -18,15 +26,17 @@ const LikeButton = ({ post, user }) => {
       return;
     }
 
-    try {
-      // The toggleLike function handles POST/DELETE based on the 'liked' state
-      await toggleLike(post.id, user.id, liked);
+    const currentLiked = liked;
+    const newLiked = !currentLiked;
+    setLiked(newLiked);
+    setLikes((prev) => (newLiked ? prev + 1 : Math.max(0, prev - 1)));
 
-      // Update local state immediately for a smooth UX
-      setLikes(liked ? likes - 1 : likes + 1);
-      setLiked(!liked);
+    try {
+      await toggleLike(user.id, post.id, currentLiked);
     } catch (error) {
       console.error("Like/Unlike failed:", error);
+      setLiked(currentLiked);
+      setLikes((prev) => (currentLiked ? prev + 1 : Math.max(0, prev - 1)));
     }
   };
 
@@ -39,6 +49,8 @@ const LikeButton = ({ post, user }) => {
             ? "bg-red-500 text-white hover:bg-red-600"
             : "bg-gray-200 text-gray-800 hover:bg-gray-300"
         }`}
+        aria-pressed={liked}
+        aria-label={liked ? "Unlike" : "Like"}
       >
         {liked ? "❤️ Liked" : "🤍 Like"}
       </button>
