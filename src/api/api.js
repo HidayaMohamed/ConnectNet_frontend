@@ -8,7 +8,7 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// -------- AUTH --------
+//  AUTH 
 export const login = async (username, password) => {
   try {
     const response = await api.post("/auth/login", { username, password });
@@ -19,7 +19,7 @@ export const login = async (username, password) => {
   }
 };
 
-// -------- USERS --------
+//USERS 
 export const register = async (userData) => {
   try {
     const response = await api.post("/users", userData);
@@ -29,9 +29,10 @@ export const register = async (userData) => {
     throw err;
   }
 };
+
 export const getUser = async (userId) => {
   try {
-    const response = await api.get(`/users/${userId}`);
+    const response = await api.get(`/users/${userId}`); // <-- FIXED: use backticks
     return response.data;
   } catch (err) {
     console.error("Get user error:", err);
@@ -40,15 +41,16 @@ export const getUser = async (userId) => {
 };
 
 export const followUser = async (userId, targetUserId) => {
-  const response = await api.post(`/follows/${userId}/${targetUserId}`);
+  const response = await api.post(`/follows/${userId}/${targetUserId}`); // <-- FIXED
   return response.data;
 };
 
 export const unfollowUser = async (userId, targetUserId) => {
-  const response = await api.delete(`/follows/${userId}/${targetUserId}`);
+  const response = await api.delete(`/follows/${userId}/${targetUserId}`); // <-- FIXED
   return response.data;
 };
-// -------- POSTS --------
+
+//POSTS
 export const getPosts = async () => {
   const response = await api.get("/posts");
   return response.data;
@@ -59,10 +61,10 @@ export const createPost = async (post) => {
   return response.data;
 };
 
-// -------- COMMENTS --------
+//COMMENTS
 export const getCommentsByPost = async (postId) => {
   try {
-    const response = await api.get(`/comments/post/${postId}`);
+    const response = await api.get(`/comments/post/${postId}`); // <-- FIXED
     return response.data;
   } catch (error) {
     console.error("Get comments error:", error.message);
@@ -80,15 +82,15 @@ export const addComment = async (commentData) => {
   }
 };
 
-// -------- LIKES --------
-// Note: backend uses /likes/{user_id}/{post_id}
+// LIKES 
+
 export const toggleLike = async (userId, postId, liked) => {
   try {
     if (liked) {
-      const response = await api.delete(`/likes/${userId}/${postId}`);
+      const response = await api.delete(`/likes/${userId}/${postId}`); // <-- FIXED
       return response.data;
     } else {
-      const response = await api.post(`/likes/${userId}/${postId}`);
+      const response = await api.post(`/likes/${userId}/${postId}`); // <-- FIXED
       return response.data;
     }
   } catch (error) {

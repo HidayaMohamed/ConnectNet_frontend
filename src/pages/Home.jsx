@@ -1,54 +1,86 @@
 import React, { useEffect, useState } from "react";
-import { getPosts } from "../api/api";
-import PostCard from "../components/PostCard";
-import CreatePost from "../components/CreatePost";
+import { getPosts } from "../api/api"; // make sure the path is correct
 
-const Home = ({ user }) => {
+const Home = () => {
   const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchPosts = async () => {
+    try {
+      setLoading(true);
+      const data = await getPosts();
+      setPosts(data);
+    } catch (error) {
+      console.error("Failed to fetch posts:", error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const data = await getPosts();
-
-        let postsArray = [];
-        if (Array.isArray(data)) {
-          postsArray = data;
-        } else if (data && Array.isArray(data.posts)) {
-          postsArray = data.posts;
-        } else {
-          postsArray = [];
-        }
-
-        console.log("--- FINAL POSTS CHECK ---");
-        console.log("Is data an Array?", Array.isArray(postsArray));
-        console.log("Number of posts received:", postsArray.length);
-        console.log("First Post Data:", postsArray[0]);
-
-        setPosts(postsArray.slice().reverse());
-      } catch (error) {
-        console.error("Failed to fetch posts:", error);
-      }
-    };
     fetchPosts();
   }, []);
 
-  const handlePostCreated = (newPost) => {
-    setPosts((prevPosts) => [newPost, ...prevPosts]);
-  };
+  if (loading) return <p>Loading posts...</p>;
+  if (!posts.length) return <p>No posts found.</p>;
 
   return (
-    <div className="max-w-2xl mx-auto mt-4">
-      {user && <CreatePost user={user} onPostCreated={handlePostCreated} />}
-
+    <div>
+      <h1>Posts</h1>
       {posts.map((post) => (
-        <PostCard key={post.id} post={post} user={user} />
+        <div
+          key={post.id}
+          style={{
+            border: "1px solid #ccc",
+            padding: "10px",
+            marginBottom: "10px",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              marginBottom: "5px",
+            }}
+          >
+            {post.user?.avatar && (
+              <img
+                src={post.user.avatar}
+                alt={post.user.username}
+                style={{
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "50%",
+                  marginRight: "10px",
+                }}
+              />
+            )}
+            <strong>{post.user?.username || "Unknown"}</strong>
+          </div>
+          <p>{post.caption}</p>
+          {post.media_url && (
+            <img
+              src={post.media_url}
+              alt="Post media"
+              style={{ maxWidth: "100%" }}
+            />
+          )}
+          <p>Likes: {post.like_count}</p>
+          {post.comments.length > 0 && (
+            <div style={{ marginTop: "10px" }}>
+              <strong>Comments:</strong>
+              {post.comments.map((comment) => (
+                <div key={comment.id} style={{ marginLeft: "10px" }}>
+                  <span>
+                    <strong>{comment.user?.username || "Unknown"}:</strong>{" "}
+                    {comment.content}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       ))}
-      {posts.length === 0 && (
-        <p className="text-center text-gray-500">
-          No posts yet. Be the first to post!
-        </p>
-      )}
     </div>
   );
 };

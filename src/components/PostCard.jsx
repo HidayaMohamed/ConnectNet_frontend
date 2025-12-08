@@ -6,6 +6,8 @@ const PostCard = ({ post = {}, user = null }) => {
   const postUser = post.user ?? {};
   const caption = post.caption ?? "";
 
+ 
+
   return (
     <div className="bg-white shadow-lg rounded-xl p-4 mb-6 border border-gray-200">
       <div className="flex items-center space-x-3 mb-3">
