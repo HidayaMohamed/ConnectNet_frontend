@@ -19,20 +19,7 @@ SPA routing with <Routes> and <Route>.
 Clean Component Structure
 Clear separation of components (Navbar) and pages (Home, Login, Register, Profile).
 
-## Project Structure
-src/
-│
-├── components/
-│   └── Navbar.jsx
-│
-├── pages/
-│   ├── Home.jsx
-│   ├── Login.jsx
-│   ├── Register.jsx
-│   └── Profile.jsx
-│
-├── App.jsx
-└── index.js
+
 
 ## How It Works
 User State Management
