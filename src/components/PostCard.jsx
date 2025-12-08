@@ -1,46 +1,67 @@
 import React from "react";
-import CommentSection from "./CommentSection";
 import LikeButton from "./LikeButton";
+import CommentSection from "./CommentSection";
 
 const PostCard = ({ post = {}, user = null }) => {
-  const postUser = post.user ?? {};
-  const caption = post.caption ?? "";
-
- 
+  const postUser = post.user || {
+    username: "Unknown",
+    avatar: "https://via.placeholder.com/40",
+  };
+  const caption = post.caption || "";
 
   return (
-    <div className="bg-white shadow-lg rounded-xl p-4 mb-6 border border-gray-200">
-      <div className="flex items-center space-x-3 mb-3">
-        <img
-          src={postUser.avatar || "https://via.placeholder.com/40"}
-          alt={postUser.username || "User"}
-          className="w-10 h-10 rounded-full object-cover"
-        />
-        <span className="font-bold text-gray-800">
-          {postUser.username || "Unknown"}
-        </span>
+    <div className="flex justify-center my-4">
+      <div
+        className="bg-white shadow-md rounded-xl border border-gray-200 overflow-hidden w-full max-w-md"
+        style={{ display: "flex", flexDirection: "column" }}
+      >
+        {/* Header */}
+        <div className="flex items-center space-x-3 p-3 border-b border-gray-100">
+          <img
+            src={postUser.avatar}
+            alt={postUser.username}
+            className="w-10 h-10 rounded-full object-cover"
+          />
+          <span className="font-semibold text-gray-800">
+            {postUser.username}
+          </span>
+        </div>
+
+        {/* Media */}
+        {post.media_url && (
+          <div className="flex justify-center items-center bg-gray-100">
+            {post.media_type === "image" && (
+              <img
+                src={post.media_url}
+                alt="post"
+                className="object-cover w-full max-h-96"
+              />
+            )}
+            {post.media_type === "video" && (
+              <video
+                src={post.media_url}
+                controls
+                className="object-cover w-full max-h-96"
+              />
+            )}
+          </div>
+        )}
+
+        {/* Likes + Caption */}
+        <div className="p-3 border-t border-gray-100 flex flex-col space-y-2">
+          {/* Like button */}
+          <div className="flex items-center justify-start">
+            <LikeButton post={post} user={user} />
+          </div>
+          {/* Caption */}
+          {caption && <p className="text-gray-700 text-sm">{caption}</p>}
+        </div>
+
+        {/* Comments */}
+        <div className="px-3 pb-3">
+          <CommentSection post={post} user={user} />
+        </div>
       </div>
-
-      <p className="mb-3 text-gray-700 whitespace-pre-wrap">{caption}</p>
-
-      {post.media_url && post.media_type === "image" && (
-        <img
-          src={post.media_url}
-          alt="post media"
-          className="rounded-lg mb-3 w-full h-auto object-cover"
-        />
-      )}
-
-      {post.media_url && post.media_type === "video" && (
-        <video controls className="rounded-lg mb-3 w-full">
-          <source src={post.media_url} />
-          Your browser does not support the video tag.
-        </video>
-      )}
-
-      {user && <LikeButton post={post} user={user} />}
-
-      <CommentSection post={post} user={user} />
     </div>
   );
 };

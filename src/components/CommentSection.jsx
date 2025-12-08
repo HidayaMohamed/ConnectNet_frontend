@@ -73,7 +73,10 @@ const CommentSection = ({ post, user }) => {
             className="flex space-x-2 mb-1 text-sm"
           >
             <img
-              src={c.user?.avatar || "https://via.placeholder.com/30"}
+              src={
+                c.user?.avatar ||
+                "https://thumbs.dreamstime.com/b/default-avatar-profile-icon-vector-social-media-user-image-182145777.jpg"
+              }
               alt={c.user?.username || "User"}
               className="w-5 h-5 rounded-full object-cover mt-1"
             />

@@ -85,17 +85,10 @@ export const addComment = async (commentData) => {
 // LIKES 
 
 export const toggleLike = async (userId, postId, liked) => {
-  try {
-    if (liked) {
-      const response = await api.delete(`/likes/${userId}/${postId}`); // <-- FIXED
-      return response.data;
-    } else {
-      const response = await api.post(`/likes/${userId}/${postId}`); // <-- FIXED
-      return response.data;
-    }
-  } catch (error) {
-    console.error("Toggle like error:", error.message);
-    throw error;
+  if (liked) {
+    return await api.delete(`/likes/${userId}/${postId}`);
+  } else {
+    return await api.post(`/likes/${userId}/${postId}`);
   }
 };
 

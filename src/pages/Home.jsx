@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { getPosts } from "../api/api"; // make sure the path is correct
+import { getPosts } from "../api/api"; 
+import PostCard from "../components/PostCard";
+import CreatePost  from "../components/CreatePost";
 
-const Home = () => {
+const Home = ({currentUser}) => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -26,60 +28,10 @@ const Home = () => {
 
   return (
     <div>
-      <h1>Posts</h1>
+      <h1 className="font-bold text-xl underline">Welcome to ConnectNet</h1>
+      <CreatePost />
       {posts.map((post) => (
-        <div
-          key={post.id}
-          style={{
-            border: "1px solid #ccc",
-            padding: "10px",
-            marginBottom: "10px",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              marginBottom: "5px",
-            }}
-          >
-            {post.user?.avatar && (
-              <img
-                src={post.user.avatar}
-                alt={post.user.username}
-                style={{
-                  width: "40px",
-                  height: "40px",
-                  borderRadius: "50%",
-                  marginRight: "10px",
-                }}
-              />
-            )}
-            <strong>{post.user?.username || "Unknown"}</strong>
-          </div>
-          <p>{post.caption}</p>
-          {post.media_url && (
-            <img
-              src={post.media_url}
-              alt="Post media"
-              style={{ maxWidth: "100%" }}
-            />
-          )}
-          <p>Likes: {post.like_count}</p>
-          {post.comments.length > 0 && (
-            <div style={{ marginTop: "10px" }}>
-              <strong>Comments:</strong>
-              {post.comments.map((comment) => (
-                <div key={comment.id} style={{ marginLeft: "10px" }}>
-                  <span>
-                    <strong>{comment.user?.username || "Unknown"}:</strong>{" "}
-                    {comment.content}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <PostCard key={post.id} post={post} user={currentUser} />
       ))}
     </div>
   );
