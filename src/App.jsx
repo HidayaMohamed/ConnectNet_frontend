@@ -22,7 +22,7 @@ function App() {
     if (user) {
       try {
         localStorage.setItem("user", JSON.stringify(user));
-      } catch {}
+      } catch(err) {("Failed to save user to localStorage:", err);}
     } else {
       localStorage.removeItem("user");
     }
