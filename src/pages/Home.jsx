@@ -26,10 +26,14 @@ const Home = ({currentUser}) => {
   if (loading) return <p>Loading posts...</p>;
   if (!posts.length) return <p>No posts found.</p>;
 
+   const handleNewPost = (post) => {
+     setPosts([post, ...posts]); 
+   };
+
   return (
     <div>
       <h1 className="font-bold text-xl underline">Welcome to ConnectNet</h1>
-      <CreatePost />
+      <CreatePost onPostCreated={handleNewPost}/>
       {posts.map((post) => (
         <PostCard key={post.id} post={post} user={currentUser} />
       ))}

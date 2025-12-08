@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getUser } from "../api/api";
-import FollowButton from "../components/FollowButton";
+
 import PostCard from "../components/PostCard";
 
 const Profile = ({ user: currentUser = null }) => {
@@ -86,13 +86,11 @@ const Profile = ({ user: currentUser = null }) => {
           <h2 className="text-3xl font-bold">{profile.username}</h2>
           <p className="text-gray-600 mb-2">{profile.bio}</p>
           {currentUser && currentUser.id !== profile.id && (
-            <FollowButton
-              user={currentUser}
-              targetUserId={profile.id}
-              initialFollowing={profile.following?.some?.(
-                (f) => (f.following_id ?? f) === profile.id
-              )}
-            />
+            <button className="bg-sky-500 text-white px-4 py-2 rounded hover:bg-sky-600">
+              {profile.followers.some((f) => f.id === currentUser.id)
+                ? "Unfollow"
+                : "Follow"}
+            </button>
           )}
         </div>
       </div>

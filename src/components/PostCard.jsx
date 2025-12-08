@@ -51,7 +51,7 @@ const PostCard = ({ post = {}, user = null }) => {
         <div className="p-3 border-t border-gray-100 flex flex-col space-y-2">
           {/* Like button */}
           <div className="flex items-center justify-start">
-            <LikeButton post={post} user={user} />
+            <LikeButton />
           </div>
           {/* Caption */}
           {caption && <p className="text-gray-700 text-sm">{caption}</p>}
